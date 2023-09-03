@@ -1,5 +1,5 @@
 {
-    "name": "jaeger/g-http",
+    "name": "sockstack/g-http",
     "description": "Simple Http client base on GuzzleHttp",
     "license": "MIT",
     "authors": [
