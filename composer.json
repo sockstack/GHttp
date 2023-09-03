@@ -9,7 +9,7 @@
         }
     ],
     "require": {
-        "cache/filesystem-adapter": "^3",
+        "cache/filesystem-adapter": "^1.2.0",
         "guzzlehttp/guzzle": ">=6.0"
     },
     "autoload":{
