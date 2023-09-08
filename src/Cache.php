@@ -8,11 +8,8 @@
 
 namespace Jaeger;
 
-
-use Cache\Adapter\Common\AbstractCachePool;
-use Cache\Adapter\Filesystem\FilesystemCachePool;
-use League\Flysystem\Adapter\Local;
-use League\Flysystem\Filesystem;
+use Symfony\Component\Cache\Adapter\FilesystemAdapter;
+use Symfony\Contracts\Cache\CacheInterface;
 
 class Cache extends GHttp
 {
@@ -25,22 +22,27 @@ class Cache extends GHttp
             return self::$name(...$arguments);
         }
         if (is_string($cacheConfig['cache'])) {
-            $filesystemAdapter = new Local($cacheConfig['cache']);
-            $filesystem        = new Filesystem($filesystemAdapter);
-            $cachePool = new FilesystemCachePool($filesystem);
-        }else if ($cacheConfig['cache'] instanceof AbstractCachePool) {
+            $cachePool = new FilesystemAdapter("", 0, $cacheConfig['cache']);
+        }else if ($cacheConfig['cache'] instanceof CacheInterface) {
             $cachePool = $cacheConfig['cache'];
         }
 
         $cacheKey = self::getCacheKey($name,$arguments);
-        $data = $cachePool->get($cacheKey);
-        if(empty($data)) {
+        $cache = $cachePool->getItem($cacheKey);
+        print_r($cache->get());
+        print_r($cacheKey);
+        if(!$cache->isHit()) {
             $data = self::$name(...$arguments);
             if(!empty($data)) {
-                $cachePool->set($cacheKey,$data,$cacheConfig['cache_ttl']);
+                $cache->set($data);
+                if (!empty($cacheConfig['cache_ttl'])) {
+                    $cache->expiresAfter($cacheConfig['cache_ttl']);
+                }
+                $cachePool->save($cache);
             }
+            return $data;
         }
-        return $data;
+        return $cache->get();
     }
 
     protected static function initCacheConfig($arguments)

@@ -9,6 +9,7 @@
 require __DIR__.'/../vendor/autoload.php';
 use Jaeger\GHttp;
 use Cache\Adapter\Predis\PredisCachePool;
+use Symfony\Component\Cache\Adapter\RedisAdapter;
 
 
 $rt = GHttp::get('http://httpbin.org/get',[
@@ -20,8 +21,8 @@ $rt = GHttp::get('http://httpbin.org/get',[
 
 print_r($rt);
 
-$client = new \Predis\Client('tcp:/127.0.0.1:6379');
-$pool = new PredisCachePool($client);
+$con = RedisAdapter::createConnection('redis://127.0.0.1:6379');
+$pool = new RedisAdapter($con);
 
 $rt = GHttp::get('http://httpbin.org/get',[
     'wd' => 'QueryList'
